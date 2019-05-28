@@ -5,10 +5,6 @@ import imutils
 import numpy as np
 import argparse
 
-parser = argparse.ArgumentParser()
-parser.add_argument("--img", type = str, required=True)
-args = parser.parse_args()
-
 # some constants kept as default from facenet
 minsize = 20
 threshold = [0.6, 0.7, 0.7]
@@ -20,7 +16,7 @@ sess = tf.Session()
 # read pnet, rnet, onet models from align directory and files are det1.npy, det2.npy, det3.npy
 pnet, rnet, onet = detect_face.create_mtcnn(sess, 'align')
 
-def getFace(img):
+def getFaces(img):
     faces = []
     img_size = np.asarray(img.shape)[0:2]
     bounding_boxes, _ = detect_face.detect_face(img, minsize, pnet, rnet, onet, threshold, factor)
@@ -38,11 +34,15 @@ def getFace(img):
                 faces.append({'face':resized,'rect':[bb[0],bb[1],bb[2],bb[3]]})
     return faces
 
-img = cv2.imread(args.img)
-img = imutils.resize(img,width=1000)
-faces = getFace(img)
-for face in faces:
-    cv2.rectangle(img, (face['rect'][0], face['rect'][1]), (face['rect'][2], face['rect'][3]), (0, 255, 0), 2)
-cv2.imshow("faces", img)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+if __name__ == "__main__":   
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--img", type = str, required=True)
+    args = parser.parse_args() 
+    img = cv2.imread(args.img)
+    img = imutils.resize(img,width=1000)
+    faces = getFaces(img)
+    for face in faces:
+        cv2.rectangle(img, (face['rect'][0], face['rect'][1]), (face['rect'][2], face['rect'][3]), (0, 255, 0), 2)
+    cv2.imshow("faces", img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
